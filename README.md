@@ -1,10 +1,12 @@
 # C.U.A.C
-Captura Universal de Avatares Coleccionables.
+C.U.A.C. Captura Universal de Avatares Coleccionables es una aplicación móvil interactiva que transforma la foto de una persona en un personaje de videojuegos. El proyecto consiste en capturar una selfie del usuario, y convertirlo en un personaje jugable que combate en una arena por turnos contra otras personas.
 
-¿Alguna vez quisiste registrar a las personas únicas o curiosas que te cruzas en el día a día? C.U.A.C es una aplicación que transforma el mundo real en un juego de colección donde puedes tomarle una foto a una persona para guardarla automáticamente en tu Intecodex, generando una ficha completa con sus características, nivel de rareza y fecha de avistamiento para que puedas completar tu colección.
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (1)" src="https://github.com/user-attachments/assets/a255a85e-11d4-4021-b4fc-1511c9cef10d" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (3)" src="https://github.com/user-attachments/assets/dbc6f616-c475-4555-99b3-c6a7e1cf0e7d" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (2)" src="https://github.com/user-attachments/assets/ab0826c9-5408-4911-b734-e24fa425b709" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM" src="https://github.com/user-attachments/assets/f2dd6ae9-f573-44a8-b241-f84b5b7cb7d2" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (4)" src="https://github.com/user-attachments/assets/05afb4f7-bacb-47a8-a4da-5a6952a4cc66" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (5)" src="https://github.com/user-attachments/assets/02762216-b61d-4e77-9a45-2411e2065770" />
+Propósito del Proyecto
+El proyecto busca ofrecer entretenimiento accesible y servir como un puente para facilitar la interacción social. Al permitir crear "avatares" únicos con fotos de los propios usuarios, la aplicación funciona como una dinámica divertida para "romper el hielo", ayudando a conectar y motivar la conversación entre personas a las que les cuesta socializar de forma natural.
+
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (5)" src="https://github.com/user-attachments/assets/650823eb-5067-4144-ad28-2a6843ef46fe" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (4)" src="https://github.com/user-attachments/assets/2fa0b147-fc46-435a-9618-10074fef2930" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (2)" src="https://github.com/user-attachments/assets/5be254de-764c-427a-b489-de681a259bdc" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (3)" src="https://github.com/user-attachments/assets/096d79e3-62dd-41c3-aa99-742e41b1d4a5" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM" src="https://github.com/user-attachments/assets/be91eb1d-12e5-4e99-8f31-30aeb8e2a07a" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (1)" src="https://github.com/user-attachments/assets/08017d43-e2de-4a29-a60a-40928197330a" />
