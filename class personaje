@@ -1,1 +1,0 @@
-Está define la estructura de la clase Personaje osea el nombre, especialidad etc y contiene los métodos para convertir el objeto a un Map y viceversa asi que permite guardar la información en formato compatible con la base de datos.
