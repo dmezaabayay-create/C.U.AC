@@ -1,1 +1,496 @@
 usamos el lenguaje de programacion  dart junto con el lemguaje flutter
+lib/models.dart
+class Personaje {
+  final int? id;
+  final String nombre;
+  final String especialidad;
+  final String imagePath;
+
+  Personaje({
+    this.id,
+    required this.nombre,
+    required this.especialidad,
+    required this.imagePath,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'especialidad': especialidad,
+      'imagePath': imagePath,
+    };
+  }
+
+  factory Personaje.fromMap(Map<String, dynamic> map) {
+    return Personaje(
+      id: map['id'],
+      nombre: map['nombre'],
+      especialidad: map['especialidad'],
+      imagePath: map['imagePath'],
+    );
+  }
+}
+
+lib/helpers.dart
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../models/personaje.dart';
+
+class DatabaseHelper {
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
+
+  DatabaseHelper._init();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('personajes.db');
+    return _database!;
+  }
+
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
+  }
+
+  Future _createDB(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE personajes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        especialidad TEXT NOT NULL,
+        imagePath TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<int> insertPersonaje(Personaje personaje) async {
+    final db = await instance.database;
+    return await db.insert('personajes', personaje.toMap());
+  }
+
+  Future<List<Personaje>> getPersonajes() async {
+    final db = await instance.database;
+    final result = await db.query('personajes');
+    return result.map((json) => Personaje.fromMap(json)).toList();
+  }
+}
+
+lib/screens.dart
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:google_mlkit_selfie_segmentation/google_mlkit_selfie_segmentation.dart';
+import '../models/personaje.dart';
+import '../helpers/database_helper.dart';
+import 'batalla_screen.dart';
+
+class CrearPersonajeScreen extends StatefulWidget {
+  final List<CameraDescription> cameras;
+
+  const CrearPersonajeScreen({super.key, required this.cameras});
+
+  @override
+  State<CrearPersonajeScreen> createState() => _CrearPersonajeScreenState();
+}
+
+class _CrearPersonajeScreenState extends State<CrearPersonajeScreen> {
+  CameraController? _controller;
+  final _nombreController = TextEditingController();
+  String _especialidadSeleccionada = 'Guerrero';
+  String? _imagePathCapturada;
+  bool _procesandoIA = false;
+
+  final List<String> _especialidades = ['Guerrero', 'Mago', 'Sanador', 'Asesino'];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.cameras.isNotEmpty) {
+      // Usar la cámara frontal por defecto para selfies
+      final cameraFrontal = widget.cameras.firstWhere(
+        (cam) => cam.lensDirection == CameraLensDirection.front,
+        orElse: () => widget.cameras.first,
+      );
+      _controller = CameraController(cameraFrontal, ResolutionPreset.medium);
+      _controller!.initialize().then((_) {
+        if (!mounted) return;
+        setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    _nombreController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _tomarFotoYProcesar() async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    try {
+      setState(() => _procesandoIA = true);
+      final XFile photo = await _controller!.takePicture();
+
+      // Segmentación con ML Kit
+      final inputImage = InputImage.fromFilePath(photo.path);
+      final segmenter = SelfieSegmenter(
+        mode: SegmenterMode.single,
+        enableRawSizeMask: true,
+      );
+
+      final mask = await segmenter.processImage(inputImage);
+      segmenter.close();
+
+      setState(() {
+        _imagePathCapturada = photo.path;
+        _procesandoIA = false;
+      });
+    } catch (e) {
+      setState(() => _procesandoIA = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al procesar selfie: $e')),
+      );
+    }
+  }
+
+  Future<void> _guardarYIrABatalla() async {
+    if (_nombreController.text.trim().isEmpty || _imagePathCapturada == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor ingresa un nombre y tómate la selfie.')),
+      );
+      return;
+    }
+
+    final nuevoPersonaje = Personaje(
+      nombre: _nombreController.text.trim(),
+      especialidad: _especialidadSeleccionada,
+      imagePath: _imagePathCapturada!,
+    );
+
+    await DatabaseHelper.instance.insertPersonaje(nuevoPersonaje);
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BatallaScreen(personaje: nuevoPersonaje),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E2C),
+      appBar: AppBar(
+        title: const Text('Crear Personaje CUACS'),
+        backgroundColor: const Color(0xFF2D2D44),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // ÁREA DE CÁMARA O PREVIEW
+            Container(
+              height: 300,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: _procesandoIA
+                    ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+                    : _imagePathCapturada != null
+                        ? Image.file(File(_imagePathCapturada!), fit: BoxFit.cover)
+                        : _controller != null && _controller!.value.isInitialized
+                            ? CameraPreview(_controller!)
+                            : const Center(child: Text('Cámara no disponible', style: TextStyle(color: Colors.white))),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _tomarFotoYProcesar,
+              icon: const Icon(Icons.camera_alt),
+              label: Text(_imagePathCapturada == null ? 'Tomar Selfie' : 'Repetir Foto'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, foregroundColor: Colors.black),
+            ),
+            const SizedBox(height: 20),
+
+            // FORMULARIO DE DATOS
+            TextField(
+              controller: _nombreController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Nombre del Héroe',
+                labelStyle: const TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: const Color(0xFF2D2D44),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _especialidadSeleccionada,
+              dropdownColor: const Color(0xFF2D2D44),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Especialidad',
+                labelStyle: const TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: const Color(0xFF2D2D44),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: _especialidades.map((esp) {
+                return DropdownMenuItem(value: esp, child: Text(esp));
+              }).toList(),
+              onChanged: (val) {
+                if (val != null) setState(() => _especialidadSeleccionada = val);
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // BOTÓN GUARDAR
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _guardarYIrABatalla,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('¡Guardar e Iniciar Batalla!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+lib/batalla.dart
+import 'dart:io';
+import 'package:flutter/material.dart';
+import '../models/personaje.dart';
+
+class BatallaScreen extends StatefulWidget {
+  final Personaje personaje;
+
+  const BatallaScreen({super.key, required this.personaje});
+
+  @override
+  State<BatallaScreen> createState() => _BatallaScreenState();
+}
+
+class _BatallaScreenState extends State<BatallaScreen> {
+  double jugadorHp = 1.0;
+  double enemigoHp = 1.0;
+  bool personajeRecibeDano = false;
+  String mensajeBatalla = "¡Que comience el combate!";
+
+  final List<Map<String, dynamic>> habilidades = [
+    {'nombre': 'Ataque Físico', 'icono': Icons.flash_on, 'color': Colors.orange, 'dano': 0.15},
+    {'nombre': 'Fuego Arcano', 'icono': Icons.local_fire_department, 'color': Colors.redAccent, 'dano': 0.25},
+    {'nombre': 'Curación', 'icono': Icons.favorite, 'color': Colors.green, 'dano': -0.20},
+    {'nombre': 'Golpe Crítico', 'icono': Icons.sports_mma, 'color': Colors.purpleAccent, 'dano': 0.35},
+  ];
+
+  void usarHabilidad(Map<String, dynamic> hab) {
+    if (enemigoHp <= 0 || jugadorHp <= 0) return;
+
+    setState(() {
+      double dano = hab['dano'];
+      if (dano < 0) {
+        jugadorHp = (jugadorHp - dano).clamp(0.0, 1.0);
+        mensajeBatalla = "${widget.personaje.nombre} usó ${hab['nombre']} y recuperó vida.";
+      } else {
+        enemigoHp = (enemigoHp - dano).clamp(0.0, 1.0);
+        personajeRecibeDano = true;
+        mensajeBatalla = "¡${widget.personaje.nombre} usó ${hab['nombre']} causando daño!";
+      }
+    });
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => personajeRecibeDano = false);
+    });
+
+    // Contraataque del enemigo
+    if (enemigoHp > 0) {
+      Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+        setState(() {
+          jugadorHp = (jugadorHp - 0.10).clamp(0.0, 1.0);
+          mensajeBatalla = "¡El Enemigo contraataca!";
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E2C),
+      appBar: AppBar(
+        title: const Text('Arena de Combate'),
+        backgroundColor: const Color(0xFF2D2D44),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2D2D44),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // ENEMIGO
+                  _buildTarjeta(
+                    nombre: "Sombra Oscura",
+                    hp: enemigoHp,
+                    colorHp: Colors.redAccent,
+                    child: const CircleAvatar(radius: 28, backgroundColor: Colors.redAccent, child: Icon(Icons.bug_report, size: 32, color: Colors.white)),
+                  ),
+
+                  // TEXTO MENSAJE
+                  Text(
+                    mensajeBatalla,
+                    style: const TextStyle(color: Colors.amber, fontSize: 15, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  // JUGADOR CON SU SELFIE
+                  AnimatedScale(
+                    scale: personajeRecibeDano ? 1.1 : 1.0,
+                    duration: const Duration(milliseconds: 150),
+                    child: _buildTarjeta(
+                      nombre: "${widget.personaje.nombre} (${widget.personaje.especialidad})",
+                      hp: jugadorHp,
+                      colorHp: Colors.greenAccent,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.file(
+                          File(widget.personaje.imagePath),
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // PANEL DE HABILIDADES
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 2.2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: habilidades.length,
+                itemBuilder: (context, index) {
+                  final hab = habilidades[index];
+                  return ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: hab['color'],
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: Icon(hab['icono'], color: Colors.white, size: 24),
+                    label: Text(hab['nombre'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    onPressed: () => usarHabilidad(hab),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTarjeta({required String nombre, required double hp, required Color colorHp, required Widget child}) {
+    return Row(
+      children: [
+        child,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(nombre, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(value: hp, minHeight: 12, backgroundColor: Colors.black48, color: colorHp),
+              ),
+              Text("${(hp * 100).toInt()}% HP", style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'screens/crear_personaje_screen.dart';
+
+List<CameraDescription> cameras = [];
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    cameras = await availableCameras();
+  } catch (e) {
+    debugPrint("Error inicializando cámaras: $e");
+  }
+  runApp(const CuacsApp());
+}
+
+class CuacsApp extends StatelessWidget {
+  const CuacsApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'CUACS RPG',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        primarySwatch: Colors.amber,
+      ),
+      home: CrearPersonajeScreen(cameras: cameras),
+    );
+  }
+}
