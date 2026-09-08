@@ -4,9 +4,11 @@ C.U.A.C. Captura Universal de Avatares Coleccionables es una aplicación móvil 
 Propósito del Proyecto
 El proyecto busca ofrecer entretenimiento accesible y servir como un puente para facilitar la interacción social. Al permitir crear "avatares" únicos con fotos de los propios usuarios, la aplicación funciona como una dinámica divertida para "romper el hielo", ayudando a conectar y motivar la conversación entre personas a las que les cuesta socializar de forma natural.
 
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (5)" src="https://github.com/user-attachments/assets/650823eb-5067-4144-ad28-2a6843ef46fe" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (4)" src="https://github.com/user-attachments/assets/2fa0b147-fc46-435a-9618-10074fef2930" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (2)" src="https://github.com/user-attachments/assets/5be254de-764c-427a-b489-de681a259bdc" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (3)" src="https://github.com/user-attachments/assets/096d79e3-62dd-41c3-aa99-742e41b1d4a5" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM" src="https://github.com/user-attachments/assets/be91eb1d-12e5-4e99-8f31-30aeb8e2a07a" />
-<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (1)" src="https://github.com/user-attachments/assets/08017d43-e2de-4a29-a60a-40928197330a" />
+
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (5)" src="https://github.com/user-attachments/assets/53478ad6-f5db-4668-a4c4-afb744bd66d7" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (4)" src="https://github.com/user-attachments/assets/b2a8f9fc-5024-4a97-a08e-3ee6c4bf302c" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (3)" src="https://github.com/user-attachments/assets/3dc9cdfd-a331-4d3f-8562-59318fb2f8a5" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (2)" src="https://github.com/user-attachments/assets/c39ddab7-afd1-4226-a40e-4f78db9e7d2e" />
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM (1)" src="https://github.com/user-attachments/assets/2d274b2c-2ae3-4d15-8115-5d8ec2bc4a5f" />
+
+<img width="1268" height="2756" alt="WhatsApp Image 2026-09-07 at 11 01 47 PM" src="https://github.com/user-attachments/assets/97860485-46b1-4e14-8a59-0a9fbcc783a9" />
